@@ -15,5 +15,4 @@ jobs:
           sleep 10
 
       - name: 🖥️ ${{ steps.step.outputs.url }}
-        run: |
-          echo "The URL is ${{ steps.step.outputs.url }}"
+        run: echo "${{ steps.step.outputs.url }}"
