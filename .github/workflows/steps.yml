@@ -1,11 +1,22 @@
 name: Test Live Deployment Status
+run-name: ${{ inputs.os }}
 
 on:
   workflow_dispatch:
-
+    inputs:
+      os:
+        description: 'Operating system'
+        type: choice
+        required: true
+        default: 'windows-latest'
+        options:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  remote-desktop:
+    name: 'Your URL:'
+    runs-on: ${{ inputs.os }}
 
     environment:
       name: Cloudflare tunnel
