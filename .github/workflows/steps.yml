@@ -1,10 +1,10 @@
-name: Remote Desktop
+name: Test Live Deployment Status
 
 on:
   workflow_dispatch:
 
 jobs:
-  URL:
+  test:
     runs-on: ubuntu-latest
 
     environment:
@@ -12,36 +12,47 @@ jobs:
 
     permissions:
       deployments: write
-      contents: read
 
     steps:
-      - name: Set environment URL
+      - name: Update deployment
         uses: actions/github-script@v8
         with:
           script: |
-            const deployments = await github.paginate(
-              github.rest.repos.listDeployments,
-              {
+            const environment = "Cloudflare tunnel";
+
+            const deployment = (
+              await github.paginate(
+                github.rest.repos.listDeployments,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  environment,
+                  sha: context.sha
+                }
+              )
+            )[0];
+
+            if (!deployment)
+              throw new Error("Deployment not found");
+
+            const update = (description, environment_url) =>
+              github.rest.repos.createDeploymentStatus({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                environment: 'Cloudflare tunnel'
-              }
-            );
-      
-            const deployment = deployments
-              .filter(d => d.sha === context.sha)
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-      
-            if (!deployment)
-              throw new Error('Deployment not found');
-      
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: deployment.id,
-              state: 'in_progress',
-              environment_url: 'https://example.trycloudflare.com'
-            });
+                deployment_id: deployment.id,
+                state: "in_progress",
+                environment,
+                description,
+                ...(environment_url && { environment_url })
+              });
 
-      - name: Keep running
-        run: sleep 300
+            await update("🔄 Creating Cloudflare tunnel...");
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            await update(
+              "🟢 Remote desktop ready",
+              "https://example.trycloudflare.com"
+            );
+
+      - run: sleep 300
