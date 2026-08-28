@@ -1,4 +1,4 @@
-name: Test Step Summary
+name: Test Live Notice
 
 on:
   workflow_dispatch:
@@ -8,17 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test live summary
+      - name: Test notice
         run: |
-          echo "# 🟢 Started" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "The step is still running..." >> "$GITHUB_STEP_SUMMARY"
+          sleep 5
 
-          sleep 30
+          echo "::notice title=🖥️ Remote Desktop Ready::https://example.trycloudflare.com"
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "# 🔗 Updated while running" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "[Click me](https://example.com)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Notice sent. Step will keep running for 2 minutes..."
 
-          sleep 30
+          sleep 115
