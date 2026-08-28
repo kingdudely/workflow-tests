@@ -17,21 +17,7 @@ jobs:
             --disable-interactivity
 
           refreshenv
-
-      - name: Refresh environment
-        shell: pwsh
-        run: |
-          $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
-                      [Environment]::GetEnvironmentVariable("Path", "User")
-
-          Write-Host "PATH:"
-          $env:Path -split ";" | ForEach-Object { Write-Host $_ }
-
-          Write-Host "`ncloudflared location:"
-          Get-Command cloudflared -ErrorAction SilentlyContinue
-
-          Write-Host "`ncloudflared version:"
-          cloudflared --version
+          tr ':' '\n' <<< "$PATH" > "$GITHUB_PATH"
 
       - name: Test from a completely new CMD process
         shell: pwsh
