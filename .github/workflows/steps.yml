@@ -1,20 +1,47 @@
-name: Test Dynamic Step Name
+name: Test Runtime Environment URL
 
 on:
   workflow_dispatch:
 
 jobs:
-  remote:
+  test:
     runs-on: ubuntu-latest
 
     environment:
       name: Remote Desktop
-      url: ${{ steps.step.outputs.url }}
+
+    permissions:
+      deployments: write
+      contents: read
 
     steps:
-      - name: Set output
-        id: step
-        run: |
-          echo ${{ github.event.deployment.id }}
+      - name: Set environment URL
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const deployments = await github.paginate(
+              github.rest.repos.listDeployments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment: 'Remote Desktop'
+              }
+            );
+      
+            const deployment = deployments
+              .filter(d => d.sha === context.sha)
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+      
+            if (!deployment)
+              throw new Error('Deployment not found');
+      
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.id,
+              state: 'in_progress',
+              environment_url: 'https://example.trycloudflare.com'
+            });
 
-      - run: sleep 21700
+      - name: Keep running
+        run: sleep 300
