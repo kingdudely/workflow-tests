@@ -8,18 +8,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Install cloudflared
+      - name: e
         shell: bash
         run: |
-          winget install --id Cloudflare.cloudflared \
-            --accept-source-agreements \
-            --accept-package-agreements \
-            --disable-interactivity
-
-          refreshenv
-          tr ':' '\n' <<< "$PATH" > "$GITHUB_PATH"
-
-      - name: Test from a completely new CMD process
-        shell: pwsh
-        run: |
+          choco install cloudflared -y
           cloudflared --version
