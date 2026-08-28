@@ -46,12 +46,12 @@ jobs:
                 ...(environment_url && { environment_url })
               });
 
-            await update("🔄 Creating Cloudflare tunnel...");
+            await update("Creating Cloudflare tunnel...");
 
             await new Promise(resolve => setTimeout(resolve, 5000));
 
             await update(
-              "🟢 Remote desktop ready",
+              "Remote desktop ready",
               "https://example.trycloudflare.com"
             );
 
