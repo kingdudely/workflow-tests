@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Install cloudflared
-        shell: pwsh
+        shell: bash
         run: |
           winget install --id Cloudflare.cloudflared `
             --accept-source-agreements `
@@ -22,5 +22,4 @@ jobs:
       - name: Test from a completely new CMD process
         shell: pwsh
         run: |
-          cmd /c "where cloudflared"
-          cmd /c "cloudflared --version"
+          cloudflared --version
