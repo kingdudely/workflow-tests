@@ -1,4 +1,4 @@
-name: Test Live Notice
+name: Test Dynamic Step Name
 
 on:
   workflow_dispatch:
@@ -8,12 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test notice
+      - name: Set output
+        id: step
         run: |
-          sleep 5
+          echo "url=https://example.trycloudflare.com" >> "$GITHUB_OUTPUT"
 
-          echo "::notice title=🖥️ Remote Desktop Ready::https://example.trycloudflare.com"
-
-          echo "Notice sent. Step will keep running for 2 minutes..."
-
-          sleep 115
+      - name: 🖥️ ${{ steps.step.outputs.url }}
+        run: |
+          echo "The URL is ${{ steps.step.outputs.url }}"
