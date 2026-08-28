@@ -11,9 +11,9 @@ jobs:
       - name: Install cloudflared
         shell: bash
         run: |
-          winget install --id Cloudflare.cloudflared `
-            --accept-source-agreements `
-            --accept-package-agreements `
+          winget install --id Cloudflare.cloudflared \
+            --accept-source-agreements \
+            --accept-package-agreements \
             --disable-interactivity
 
           refreshenv
