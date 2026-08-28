@@ -16,6 +16,8 @@ jobs:
             --accept-package-agreements `
             --disable-interactivity
 
+          refreshenv
+
       - name: Refresh environment
         shell: pwsh
         run: |
