@@ -4,8 +4,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  remote:
     runs-on: ubuntu-latest
+
+    environment:
+      name: 🖥️ Remote Desktop
+      url: ${{ steps.step.outputs.url }}
 
     steps:
       - name: Set output
@@ -13,6 +17,3 @@ jobs:
         run: |
           echo "url=https://example.trycloudflare.com" >> "$GITHUB_OUTPUT"
           sleep 10
-
-      - name: 🖥️ ${{ steps.step.outputs.url }}
-        run: echo "${{ steps.step.outputs.url }}"
