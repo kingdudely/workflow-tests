@@ -1,4 +1,4 @@
-name: Test Live Deployment Status
+name: Remote Desktop
 run-name: ${{ inputs.os }}
 
 on:
@@ -14,8 +14,8 @@ on:
           - ubuntu-latest
           - macos-latest
 jobs:
-  remote-desktop:
-    name: 'Your URL:'
+  URL:
+    name: 'URL'
     runs-on: ${{ inputs.os }}
 
     environment:
