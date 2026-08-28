@@ -1,14 +1,14 @@
-name: Test Runtime Environment URL
+name: Remote Desktop
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  URL:
     runs-on: ubuntu-latest
 
     environment:
-      name: Remote Desktop
+      name: Cloudflare tunnel
 
     permissions:
       deployments: write
