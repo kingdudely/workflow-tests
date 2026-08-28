@@ -5,10 +5,7 @@ on:
 
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest-latest
 
     steps:
-      - shell: bash
-        run: choco install cloudflared -y
-      - shell: bash
-        run: cloudflared --version
+      - run: pacman -Syu cloudflared
