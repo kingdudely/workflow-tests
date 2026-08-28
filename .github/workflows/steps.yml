@@ -15,6 +15,6 @@ jobs:
       - name: Set output
         id: step
         run: |
-          echo "url=https://example.trycloudflare.com" >> "$GITHUB_OUTPUT"
+          echo ${{ github.event.deployment.id }}
 
       - run: sleep 21700
