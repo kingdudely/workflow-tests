@@ -1,0 +1,38 @@
+name: Test cloudflared PATH
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Install cloudflared
+        shell: pwsh
+        run: |
+          winget install --id Cloudflare.cloudflared `
+            --accept-source-agreements `
+            --accept-package-agreements `
+            --disable-interactivity
+
+      - name: Refresh environment
+        shell: pwsh
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
+                      [Environment]::GetEnvironmentVariable("Path", "User")
+
+          Write-Host "PATH:"
+          $env:Path -split ";" | ForEach-Object { Write-Host $_ }
+
+          Write-Host "`ncloudflared location:"
+          Get-Command cloudflared -ErrorAction SilentlyContinue
+
+          Write-Host "`ncloudflared version:"
+          cloudflared --version
+
+      - name: Test from a completely new CMD process
+        shell: pwsh
+        run: |
+          cmd /c "where cloudflared"
+          cmd /c "cloudflared --version"
