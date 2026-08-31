@@ -46,8 +46,17 @@ jobs:
             if (!deployment)
               throw new Error("Deployment not found");
 
-            const update = (description, environment_url) =>
-              github.rest.repos.createDeploymentStatus({
+            const update = (description, environment_url) => {
+            console.log(JSON.stringify({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.id,
+                state: "in_progress",
+                environment,
+                description,
+                ...(environment_url && { environment_url })
+              }, null, 2));
+              return github.rest.repos.createDeploymentStatus({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 deployment_id: deployment.id,
@@ -56,6 +65,7 @@ jobs:
                 description,
                 ...(environment_url && { environment_url })
               });
+              }
 
             await update("Creating Cloudflare tunnel...");
 
