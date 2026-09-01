@@ -1,25 +1,56 @@
-name: Test Environment URL
+name: Test Runtime Environment URL
 
 on:
   workflow_dispatch:
 
 jobs:
   test:
-    name: Test URL
-
     runs-on: ubuntu-latest
+
+    permissions:
+      deployments: write
 
     environment:
       name: test
-      url: ${{ steps.url.outputs.url }}
+      url: ${{ steps.deploy.outputs.url }}
 
     steps:
       - name: Generate URL
-        id: url
+        id: deploy
         run: |
           echo "url=https://example.com" >> "$GITHUB_OUTPUT"
 
+      - name: Update deployment
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { data: deployments } =
+              await github.rest.repos.listDeployments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment: 'test',
+                per_page: 100
+              });
+
+            const deployment = deployments.find(
+              d => d.ref === context.sha
+            );
+
+            if (!deployment) {
+              core.setFailed('Could not find current deployment');
+              return;
+            }
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.id,
+              state: 'in_progress',
+              environment_url: process.env.URL
+            });
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+
       - name: Keep job running
-        run: |
-          echo "URL output: ${{ steps.url.outputs.url }}"
-          sleep 300
+        run: sleep 300
