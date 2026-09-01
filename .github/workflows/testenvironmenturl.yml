@@ -1,4 +1,4 @@
-name: Test Deployment ID
+name: Test Node Deployment
 
 on:
   workflow_dispatch:
@@ -14,25 +14,53 @@ jobs:
     steps:
       - name: Create deployment
         id: deployment
-        uses: bobheadxi/deployments@v1
+        uses: actions/github-script@v9
         with:
-          step: start
-          token: ${{ github.token }}
-          env: test-environment
+          retries: 3
+          script: |
+            const { owner, repo } = context.repo;
+
+            const { data: deployment } =
+              await github.rest.repos.createDeployment({
+                owner,
+                repo,
+                ref: context.sha,
+                environment: "Cloudflare tunnel",
+                auto_merge: false,
+                required_contexts: [],
+                description: "Remote desktop test"
+              });
+
+            console.log(`Deployment ID: ${deployment.id}`);
+            console.log(`Environment: ${deployment.environment}`);
+
+            return deployment.id;
 
       - name: Show deployment ID
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
         run: |
-          echo "Deployment ID: ${{ steps.deployment.outputs.deployment_id }}"
+          echo "Deployment ID: $DEPLOYMENT_ID"
 
-      - name: Finish deployment
-        uses: bobheadxi/deployments@v1
+      - name: Set deployment URL
+        uses: actions/github-script@v9
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
         with:
-          step: finish
-          token: ${{ github.token }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env: test-environment
-          env_url: https://example.com
-          status: success
+          retries: 3
+          script: |
+            const deploymentId = Number(process.env.DEPLOYMENT_ID);
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deploymentId,
+              state: "in_progress",
+              description: "Remote desktop ready",
+              environment_url: "https://example.com"
+            });
+
+            console.log(`Updated deployment ${deploymentId}`);
 
       - name: Keep workflow alive
         run: sleep 300
