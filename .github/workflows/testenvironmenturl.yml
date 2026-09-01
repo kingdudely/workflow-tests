@@ -1,4 +1,4 @@
-name: Test Runtime Environment URL
+name: Test Deployment ID
 
 on:
   workflow_dispatch:
@@ -8,49 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      contents: read
       deployments: write
 
-    environment:
-      name: test
-      url: ${{ steps.deploy.outputs.url }}
-
     steps:
-      - name: Generate URL
-        id: deploy
-        run: |
-          echo "url=https://example.com" >> "$GITHUB_OUTPUT"
-
-      - name: Update deployment
-        uses: actions/github-script@v8
+      - name: Create deployment
+        id: deployment
+        uses: bobheadxi/deployments@v1
         with:
-          github-token: ${{ github.token }}
-          script: |
-            const { data: deployments } =
-              await github.rest.repos.listDeployments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                environment: 'test',
-                per_page: 100
-              });
+          step: start
+          token: ${{ github.token }}
+          env: test-environment
 
-            const deployment = deployments.find(
-              d => d.ref === context.sha
-            );
+      - name: Show deployment ID
+        run: |
+          echo "Deployment ID: ${{ steps.deployment.outputs.deployment_id }}"
 
-            if (!deployment) {
-              core.setFailed('Could not find current deployment');
-              return;
-            }
+      - name: Finish deployment
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ github.token }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          env: test-environment
+          env_url: https://example.com
+          status: success
 
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: deployment.id,
-              state: 'in_progress',
-              environment_url: process.env.URL
-            });
-        env:
-          URL: ${{ steps.deploy.outputs.url }}
-
-      - name: Keep job running
+      - name: Keep workflow alive
         run: sleep 300
