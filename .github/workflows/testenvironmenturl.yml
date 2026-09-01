@@ -1,0 +1,26 @@
+name: Test Environment URL
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test URL
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: test
+      url: ${{ steps.url.outputs.url }}
+
+    steps:
+      - name: Generate URL
+        id: url
+        run: |
+          sleep 10
+          echo "url=https://example.com" >> "$GITHUB_OUTPUT"
+
+      - name: Keep job running
+        run: |
+          echo "URL output: ${{ steps.url.outputs.url }}"
+          sleep 300
