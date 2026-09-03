@@ -9,7 +9,7 @@ jobs:
 
     environment:
       name: awef
-      url: ${{ steps.tunnel.outputs.server }}
+      url: https://${{ steps.tunnel.outputs.server }}
 
     steps:
       - name: Establish tunnel
@@ -18,3 +18,4 @@ jobs:
         with:
           protocol: http
           port: 8080
+      - run: sleep infinity
