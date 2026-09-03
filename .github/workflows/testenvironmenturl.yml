@@ -19,4 +19,5 @@ jobs:
           protocol: http
           port: 8080
 
-      - run: sleep 120
+      - name: https://${{ steps.tunnel.outputs.server }}
+        run: sleep 120
