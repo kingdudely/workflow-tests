@@ -7,60 +7,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      deployments: write
+    environment:
+      name: awef
+      url: ${{ steps.tunnel.outputs.server }}
 
     steps:
-      - name: Create deployment
-        id: deployment
-        uses: actions/github-script@v9
+      - name: Establish tunnel
+        id: tunnel
+        uses: anyvm-org/cf-tunnel@v0
         with:
-          retries: 3
-          script: |
-            const { owner, repo } = context.repo;
-
-            const { data: deployment } =
-              await github.rest.repos.createDeployment({
-                owner,
-                repo,
-                ref: context.sha,
-                environment: "Cloudflare tunnel",
-                auto_merge: false,
-                required_contexts: [],
-                description: "Remote desktop test"
-              });
-
-            console.log(`Deployment ID: ${deployment.id}`);
-            console.log(`Environment: ${deployment.environment}`);
-
-            return deployment.id;
-
-      - name: Show deployment ID
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
-        run: |
-          echo "Deployment ID: $DEPLOYMENT_ID"
-
-      - name: Set deployment URL
-        uses: actions/github-script@v9
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
-        with:
-          retries: 3
-          script: |
-            const deploymentId = Number(process.env.DEPLOYMENT_ID);
-
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: deploymentId,
-              state: "in_progress",
-              description: "Remote desktop ready",
-              environment_url: "https://example.com"
-            });
-
-            console.log(`Updated deployment ${deploymentId}`);
-
-      - name: Keep workflow alive
-        run: sleep 300
+          protocol: http
+          port: 8080
