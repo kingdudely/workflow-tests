@@ -18,4 +18,5 @@ jobs:
         with:
           protocol: http
           port: 8080
-      - run: sleep infinity
+
+      - run: sleep 60
